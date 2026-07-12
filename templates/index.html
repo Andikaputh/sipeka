@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SiPEKA - Sistem Prediksi Risiko Preeklampsia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="navbar-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+    </div>
+    <div class="brand-text">
+      <span class="brand-name">SiPEKA</span>
+      <span class="brand-sub">Sistem Prediksi Preeklampsia</span>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <span class="nav-badge">Alat Bantu Skrining Bidan</span>
+  </div>
+</nav>
+
+<main class="page">
+
+  <div class="hero">
+    <div class="hero-kicker"><span class="hero-dot"></span> Alat Bantu Bidan &middot; ANC Puskesmas</div>
+    <h1>Deteksi Dini Risiko <em>Preeklampsia</em><br>pada Ibu Hamil</h1>
+    <p>Masukkan data klinis pasien dari pemeriksaan ANC. Hasil prediksi risiko akan muncul di jendela hasil dan bisa langsung dicetak.</p>
+  </div>
+
+  <div class="layout">
+
+    <!-- ASIDE KIRI -->
+    <aside class="side">
+      <div class="side-card">
+        <div class="side-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Cara Pakai
+        </div>
+        <ol class="side-steps">
+          <li>Isi tekanan darah (wajib). Data lain diisi bila tersedia.</li>
+          <li>Klik tombol <strong>Analisis Risiko Preeklampsia</strong>.</li>
+          <li>Baca hasil &amp; rekomendasi pada jendela yang muncul, cetak bila perlu.</li>
+        </ol>
+      </div>
+      <div class="side-card">
+        <div class="side-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Catatan Penting
+        </div>
+        <p class="side-note">Sistem ini adalah <strong>alat bantu skrining</strong>, bukan pengganti diagnosis dokter. Hasil harus dikonfirmasi tenaga medis.</p>
+      </div>
+    </aside>
+
+    <!-- FORM (tengah) -->
+    <div class="form-col">
+      <div class="card" id="form-card">
+        <div class="card-header">
+          <div class="card-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <div>
+            <div class="card-title">Formulir Data Klinis ANC</div>
+            <div class="card-subtitle">Isi data dari rekam medis ibu hamil &middot; hanya TD yang wajib</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="patient-banner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            <p>Data pasien bersifat <strong>anonim</strong> dan hanya digunakan untuk prediksi pada sesi ini.</p>
+          </div>
+
+          <form id="predict-form" novalidate>
+            <div class="form-grid">
+
+              <div class="form-section-label">Data Demografis &amp; Kehamilan</div>
+
+              <div class="form-group">
+                <label class="form-label" for="Usia_Tahun">Usia Ibu</label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                  <input class="form-input" type="number" id="Usia_Tahun" name="Usia_Tahun" min="10" max="60" placeholder="contoh: 28"/>
+                  <span class="input-unit">Tahun</span>
+                </div>
+                <span class="form-hint">Faktor risiko: &lt;20 atau &gt;35 tahun</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Usia_Kehamilan_Minggu">Usia Kehamilan</label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <input class="form-input" type="number" id="Usia_Kehamilan_Minggu" name="Usia_Kehamilan_Minggu" min="1" max="42" placeholder="contoh: 32"/>
+                  <span class="input-unit">Minggu</span>
+                </div>
+                <span class="form-hint">Preeklampsia muncul setelah minggu ke-20</span>
+              </div>
+
+              <div class="form-section-label">Data Tekanan Darah</div>
+
+              <div class="form-group">
+                <label class="form-label" for="TD_Sistolik">TD Sistolik <span class="req">*</span></label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  <input class="form-input" type="number" id="TD_Sistolik" name="TD_Sistolik" min="70" max="220" placeholder="contoh: 120" required/>
+                  <span class="input-unit">mmHg</span>
+                </div>
+                <span class="form-hint" id="hint-sistolik">Waspada jika &ge; 140 mmHg</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="TD_Diastolik">TD Diastolik <span class="req">*</span></label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  <input class="form-input" type="number" id="TD_Diastolik" name="TD_Diastolik" min="40" max="150" placeholder="contoh: 80" required/>
+                  <span class="input-unit">mmHg</span>
+                </div>
+                <span class="form-hint" id="hint-diastolik">Waspada jika &ge; 90 mmHg</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="MAP">MAP (dihitung otomatis)</label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                  <input class="form-input" type="number" id="MAP" name="MAP" placeholder="Otomatis dari TD" readonly style="background:var(--sky-100);cursor:not-allowed"/>
+                  <span class="input-unit">mmHg</span>
+                </div>
+                <span class="form-hint">= (Sistolik + 2&times;Diastolik) / 3</span>
+              </div>
+
+              <div class="form-section-label">Data Antropometri</div>
+
+              <div class="form-group">
+                <label class="form-label" for="BB_kg">Berat Badan</label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+                  <input class="form-input" type="number" id="BB_kg" name="BB_kg" min="30" max="150" step="0.1" placeholder="contoh: 60"/>
+                  <span class="input-unit">kg</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="TB_cm">Tinggi Badan</label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><polyline points="17 7 12 2 7 7"/></svg>
+                  <input class="form-input" type="number" id="TB_cm" name="TB_cm" min="100" max="220" step="0.1" placeholder="contoh: 158"/>
+                  <span class="input-unit">cm</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="IMT">IMT (dihitung otomatis)</label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+                  <input class="form-input" type="number" id="IMT" name="IMT" placeholder="Otomatis dari BB/TB" readonly style="background:var(--sky-100);cursor:not-allowed"/>
+                  <span class="input-unit">kg/m&sup2;</span>
+                </div>
+                <span class="form-hint">= BB / (TB dalam meter)&sup2;</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="LILA_cm">Lingkar Lengan Atas</label>
+                <div class="input-wrap">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                  <input class="form-input" type="number" id="LILA_cm" name="LILA_cm" min="15" max="50" step="0.1" placeholder="contoh: 25"/>
+                  <span class="input-unit">cm</span>
+                </div>
+                <span class="form-hint">KEK jika &lt; 23.5 cm</span>
+              </div>
+
+              <div class="form-section-label">Data Klinis Lainnya</div>
+
+              <div class="form-group">
+                <label class="form-label" for="Protein_Uria">Protein Uria</label>
+                <div class="input-wrap" style="position:relative">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/></svg>
+                  <select class="form-input" id="Protein_Uria" name="Protein_Uria" style="padding-left:2.6rem;appearance:none;cursor:pointer">
+                    <option value="">-- Pilih --</option>
+                    <option value="0">Negatif (T)</option>
+                    <option value="1">Positif (Y)</option>
+                  </select>
+                </div>
+                <span class="form-hint">Salah satu kriteria preeklampsia</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Gula_Darah">Gula Darah</label>
+                <div class="input-wrap" style="position:relative">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+                  <select class="form-input" id="Gula_Darah" name="Gula_Darah" style="padding-left:2.6rem;appearance:none;cursor:pointer">
+                    <option value="">-- Pilih --</option>
+                    <option value="0">Negatif (T)</option>
+                    <option value="1">Positif (Y)</option>
+                  </select>
+                </div>
+                <span class="form-hint">Hasil skrining gula darah / glukosuria (Y/T)</span>
+              </div>
+
+            </div>
+
+            <button type="submit" class="btn-predict" id="predict-btn">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              <div class="spinner"></div>
+              <span class="btn-text">Analisis Risiko Preeklampsia</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASIDE KANAN -->
+    <aside class="side">
+      <div class="side-card">
+        <div class="side-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Ambang Klinis (PNPK)
+        </div>
+        <ul class="ref-list">
+          <li><span>Hipertensi (rujuk)</span> <b class="danger">&ge;140/90</b></li>
+          <li><span>Waspada dini</span> <b class="warn">130&ndash;139/85&ndash;89</b></li>
+          <li><span>MAP waspada</span> <b class="warn">&ge;97 mmHg</b></li>
+          <li><span>Proteinuria</span> <b>Positif (+)</b></li>
+        </ul>
+      </div>
+      <div class="side-card">
+        <div class="side-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Faktor Risiko
+        </div>
+        <ul class="ref-list">
+          <li><span>Usia ibu</span> <b>&lt;20 / &gt;35 th</b></li>
+          <li><span>IMT (obesitas)</span> <b>&ge;30</b></li>
+          <li><span>LILA (KEK)</span> <b>&lt;23,5 cm</b></li>
+          <li><span>Gula darah</span> <b>Positif (+)</b></li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-logo">
+    <div class="footer-dot"></div>
+    <span class="footer-brand">SiPEKA</span>
+    <div class="footer-dot"></div>
+  </div>
+  <p>Sistem Prediksi Risiko Preeklampsia &middot; <strong>Program Studi Informatika</strong><br>
+  Penelitian Ilmiah &middot; Data Primer ANC Puskesmas Cipayung &middot; 2025/2026</p>
+</footer>
+
+<!-- MODAL HASIL -->
+<div class="modal-overlay" id="result-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="risk-title">
+    <button class="modal-close" id="modal-close" aria-label="Tutup">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="print-area">
+      <div class="print-header">
+        <div class="print-title">SiPEKA &mdash; Hasil Skrining Risiko Preeklampsia</div>
+        <div class="print-sub">Puskesmas Cipayung &middot; Alat Bantu Skrining Bidan</div>
+      </div>
+      <div id="risk-badge" class="risk-badge">
+        <div id="risk-icon-wrap" class="risk-icon-wrap">
+          <svg id="risk-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+        </div>
+        <div>
+          <div id="risk-label" class="risk-label"></div>
+          <div id="risk-title" class="risk-title"></div>
+          <div id="risk-sub" class="risk-sub"></div>
+        </div>
+      </div>
+      <div class="prob-section">
+        <div class="prob-label-row">
+          <span class="prob-label">Probabilitas Berisiko</span>
+          <span id="prob-pct" class="prob-pct">&mdash;</span>
+        </div>
+        <div class="prob-track"><div id="prob-fill" class="prob-fill" style="width:0%"></div></div>
+      </div>
+      <div class="result-divider"></div>
+      <div class="flags-section" id="flags-section"></div>
+      <div class="result-divider"></div>
+      <div id="rekom-section" class="rekom-section">
+        <div class="rekom-title">Rekomendasi Tindak Lanjut</div>
+        <ul id="rekom-list" class="rekom-list"></ul>
+      </div>
+      <div class="print-footer">Dicetak dari SiPEKA &middot; Bukan pengganti diagnosis dokter</div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-action outline" id="btn-reset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Tutup &amp; Reset
+      </button>
+      <button class="btn-action filled" id="btn-print">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Cetak Hasil
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
