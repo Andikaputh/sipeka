@@ -214,6 +214,62 @@ function showToast(msg, type = 'error') {
   setTimeout(() => toast.classList.remove('show'), 3500);
 }
 
+/* ---- Tur onboarding ---- */
+const tourSteps = [
+  { el: null, title: 'Selamat Datang di SiPEKA', text: 'Alat bantu skrining risiko preeklampsia untuk bidan pada pemeriksaan ANC. Kenali fiturnya sebentar. Anda dapat melewati kapan saja.' },
+  { el: '#form-card', title: 'Formulir Data Klinis', text: 'Masukkan data pemeriksaan pasien di sini. Hanya tekanan darah yang wajib diisi, data lain melengkapi bila tersedia.' },
+  { el: '#TD_Sistolik', title: 'Tekanan Darah (Wajib)', text: 'Isi TD Sistolik dan Diastolik. Nilai MAP akan terhitung otomatis dari kedua nilai ini.' },
+  { el: '#btn-example', title: 'Isi Contoh Data', text: 'Klik untuk mengisi data contoh secara otomatis. Berguna untuk mencoba sistem dengan cepat.' },
+  { el: '#predict-btn', title: 'Analisis Risiko', text: 'Klik untuk menjalankan model dan menampilkan hasil prediksi beserta rekomendasi tindak lanjut.' },
+  { el: '#btn-panduan', title: 'Panduan & Tutorial', text: 'Buka panduan penggunaan atau putar ulang tutorial ini kapan saja melalui tombol ini.' },
+];
+let tourIdx = 0;
+
+function placeTour(elx) {
+  const r = elx.getBoundingClientRect(), pad = 8;
+  const spot = $('tour-spot'), pop = $('tour-pop');
+  spot.style.left = (r.left - pad) + 'px';
+  spot.style.top = (r.top - pad) + 'px';
+  spot.style.width = (r.width + pad * 2) + 'px';
+  spot.style.height = (r.height + pad * 2) + 'px';
+  const popW = Math.min(320, window.innerWidth - 24);
+  let top = r.bottom + 14, left = r.left;
+  if (top + 200 > window.innerHeight) top = Math.max(12, r.top - 14 - 200);
+  left = Math.min(Math.max(12, left), window.innerWidth - popW - 12);
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+}
+
+function renderTour() {
+  const step = tourSteps[tourIdx];
+  const welcome = !step.el;
+  $('tour').classList.toggle('welcome', welcome);
+  $('tour-count').textContent = welcome ? '' : ('Langkah ' + tourIdx + ' dari ' + (tourSteps.length - 1));
+  $('tour-title').textContent = step.title;
+  $('tour-text').textContent = step.text;
+  $('tour-prev').style.display = (!welcome && tourIdx > 1) ? '' : 'none';
+  $('tour-next').textContent = welcome ? 'Mulai Tutorial' : (tourIdx === tourSteps.length - 1 ? 'Selesai' : 'Lanjut');
+  if (welcome) return;
+  const elx = document.querySelector(step.el);
+  if (!elx) { nextTour(); return; }
+  elx.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  setTimeout(() => placeTour(elx), 320);
+}
+
+function startTour() {
+  tourIdx = 0;
+  $('tour').classList.add('open');
+  $('tour').setAttribute('aria-hidden', 'false');
+  renderTour();
+}
+function endTour() {
+  $('tour').classList.remove('open');
+  $('tour').setAttribute('aria-hidden', 'true');
+  try { localStorage.setItem('sipeka_tour_done', '1'); } catch (e) {}
+}
+function nextTour() { if (tourIdx < tourSteps.length - 1) { tourIdx++; renderTour(); } else { endTour(); } }
+function prevTour() { if (tourIdx > 1) { tourIdx--; renderTour(); } }
+
 document.addEventListener('DOMContentLoaded', () => {
   ['BB_kg', 'TB_cm'].forEach(id => { const el = $(id); if (el) el.addEventListener('input', calcIMT); });
   watchTD();
@@ -227,7 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
   $('panduan-close').addEventListener('click', closePanduan);
   $('panduan-ok').addEventListener('click', closePanduan);
   $('panduan-modal').addEventListener('click', e => { if (e.target === $('panduan-modal')) closePanduan(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePanduan(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePanduan(); endTour(); } });
+  $('tour-next').addEventListener('click', nextTour);
+  $('tour-prev').addEventListener('click', prevTour);
+  $('tour-skip').addEventListener('click', endTour);
+  $('panduan-tour').addEventListener('click', () => { closePanduan(); startTour(); });
+  const repositionTour = () => { if ($('tour').classList.contains('open') && tourSteps[tourIdx].el) { const e = document.querySelector(tourSteps[tourIdx].el); if (e) placeTour(e); } };
+  window.addEventListener('resize', repositionTour);
+  window.addEventListener('scroll', repositionTour, true);
+  try { if (!localStorage.getItem('sipeka_tour_done')) setTimeout(startTour, 700); } catch (e) {}
   console.log('SiPEKA initialized');
 });
 

@@ -403,3 +403,30 @@ body::before{content:'';position:fixed;inset:0;
   .hero h1{font-size:1.32rem}
   .card-body{padding:1.1rem .95rem}
 }
+
+
+/* ═══ TUR ONBOARDING ═══ */
+.tour{position:fixed;inset:0;z-index:2000;display:none;pointer-events:none}
+.tour.open{display:block}
+.tour.welcome{background:rgba(12,74,110,.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);pointer-events:auto}
+.tour-spot{position:fixed;border-radius:12px;border:2px solid var(--sky-300);
+  box-shadow:0 0 0 9999px rgba(12,74,110,.55);transition:all .3s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.tour.welcome .tour-spot{display:none}
+.tour-pop{position:fixed;max-width:320px;width:calc(100% - 24px);background:white;border-radius:16px;
+  box-shadow:0 20px 50px rgba(12,74,110,.3);padding:1.15rem 1.25rem;pointer-events:auto;animation:tourPop .25s ease}
+.tour.welcome .tour-pop{left:50%!important;top:50%!important;transform:translate(-50%,-50%);max-width:400px;text-align:center;animation:none}
+@keyframes tourPop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tour-count{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--sky-600);margin-bottom:.4rem}
+.tour-title{font-family:var(--font-d);font-size:1.05rem;font-weight:600;color:var(--sky-900);margin-bottom:.4rem}
+.tour-text{font-size:.82rem;color:var(--slate-600);line-height:1.6;margin-bottom:1rem}
+.tour-actions{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+.tour.welcome .tour-actions{justify-content:center}
+.tour-nav{display:flex;gap:.5rem}
+.tour-skip{background:none;border:none;font-family:var(--font-b);font-size:.76rem;font-weight:600;color:var(--slate-400);cursor:pointer;padding:.4rem .2rem}
+.tour-skip:hover{color:var(--slate-600)}
+.tour-btn{font-family:var(--font-b);font-size:.78rem;font-weight:600;border-radius:var(--r-md);cursor:pointer;padding:.5rem 1rem;border:1.5px solid;transition:all var(--t)}
+.tour-btn.ghost{background:white;color:var(--sky-700);border-color:var(--sky-200)}
+.tour-btn.ghost:hover{background:var(--sky-50)}
+.tour-btn.filled{background:var(--sky-600);color:white;border-color:var(--sky-600)}
+.tour-btn.filled:hover{background:var(--sky-700)}
+@media print{.tour{display:none!important}}
