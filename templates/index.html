@@ -108,7 +108,7 @@
               <div class="form-section-label">Data Tekanan Darah</div>
 
               <div class="form-group">
-                <label class="form-label" for="TD_Sistolik">TD Sistolik <span class="req">*</span></label>
+                <label class="form-label" for="TD_Sistolik">Tekanan Darah Sistolik <span class="req">*</span></label>
                 <div class="input-wrap">
                   <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                   <input class="form-input" type="number" id="TD_Sistolik" name="TD_Sistolik" min="70" max="220" placeholder="contoh: 120" required/>
@@ -118,7 +118,7 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="TD_Diastolik">TD Diastolik <span class="req">*</span></label>
+                <label class="form-label" for="TD_Diastolik">Tekanan Darah Diastolik <span class="req">*</span></label>
                 <div class="input-wrap">
                   <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                   <input class="form-input" type="number" id="TD_Diastolik" name="TD_Diastolik" min="40" max="150" placeholder="contoh: 80" required/>
@@ -128,7 +128,7 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="MAP">MAP (dihitung otomatis)</label>
+                <label class="form-label" for="MAP">Tekanan Arteri Rata-rata (MAP)</label>
                 <div class="input-wrap">
                   <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                   <input class="form-input" type="number" id="MAP" name="MAP" placeholder="Otomatis dari TD" readonly style="background:var(--sky-100);cursor:not-allowed"/>
@@ -158,7 +158,7 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="IMT">IMT (dihitung otomatis)</label>
+                <label class="form-label" for="IMT">Indeks Massa Tubuh (IMT)</label>
                 <div class="input-wrap">
                   <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
                   <input class="form-input" type="number" id="IMT" name="IMT" placeholder="Otomatis dari BB/TB" readonly style="background:var(--sky-100);cursor:not-allowed"/>
@@ -355,6 +355,22 @@
     <div class="result-actions">
       <button class="btn-action outline" id="panduan-tour" style="flex:1">Putar Ulang Tutorial</button>
       <button class="btn-action filled" id="panduan-ok" style="flex:1">Mengerti</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERINGATAN DATA WAJIB -->
+<div class="modal-overlay" id="warn-modal" aria-hidden="true">
+  <div class="modal warn" role="dialog" aria-modal="true" aria-labelledby="warn-title">
+    <div class="warn-body">
+      <div class="warn-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="warn-title" id="warn-title">Data Belum Lengkap</div>
+      <div class="warn-text">Tekanan Darah Sistolik dan Diastolik wajib diisi terlebih dahulu sebelum melakukan analisis risiko.</div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-action filled" id="warn-ok" style="flex:1">Mengerti</button>
     </div>
   </div>
 </div>

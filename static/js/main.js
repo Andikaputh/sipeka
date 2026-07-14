@@ -11,6 +11,8 @@ const val = id => {
   return v === '' ? null : (el.type === 'number' ? parseFloat(v) : v);
 };
 
+let lastData = null;
+
 function calcMAP() {
   const s = val('TD_Sistolik'), d = val('TD_Diastolik');
   $('MAP').value = (s && d) ? ((s + 2 * d) / 3).toFixed(1) : '';
@@ -56,7 +58,9 @@ async function handleSubmit(e) {
   e.preventDefault();
   const sbp = val('TD_Sistolik'), dbp = val('TD_Diastolik');
   if (!sbp || !dbp) {
-    showToast('Isi minimal TD Sistolik dan TD Diastolik!', 'error');
+    if (!sbp) $('TD_Sistolik').classList.add('input-danger');
+    if (!dbp) $('TD_Diastolik').classList.add('input-danger');
+    openWarn();
     return;
   }
   const payload = {
@@ -97,6 +101,7 @@ async function handleSubmit(e) {
 }
 
 function renderResult(data) {
+  lastData = data;
   const isHigh = data.prediction === 1;
   const probPct = data.probability;
   const badge = $('risk-badge');
@@ -205,6 +210,79 @@ function closePanduan() {
   document.body.style.overflow = '';
 }
 
+function openWarn() { const m = $('warn-modal'); m.classList.add('open'); m.setAttribute('aria-hidden', 'false'); }
+function closeWarn() { const m = $('warn-modal'); m.classList.remove('open'); m.setAttribute('aria-hidden', 'true'); }
+
+function buildReportHTML(data) {
+  const isHigh = data.prediction === 1;
+  const now = new Date();
+  const tgl = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) +
+    ', ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+  const yn = v => (v === '1' ? 'Positif' : (v === '0' ? 'Negatif' : null));
+  const rows = [
+    ['Usia Ibu', val('Usia_Tahun'), 'tahun'],
+    ['Usia Kehamilan', val('Usia_Kehamilan_Minggu'), 'minggu'],
+    ['Tekanan Darah Sistolik', val('TD_Sistolik'), 'mmHg'],
+    ['Tekanan Darah Diastolik', val('TD_Diastolik'), 'mmHg'],
+    ['Tekanan Arteri Rata-rata (MAP)', $('MAP').value, 'mmHg'],
+    ['Berat Badan', val('BB_kg'), 'kg'],
+    ['Tinggi Badan', val('TB_cm'), 'cm'],
+    ['Indeks Massa Tubuh (IMT)', $('IMT').value, 'kg/m2'],
+    ['Lingkar Lengan Atas', val('LILA_cm'), 'cm'],
+    ['Protein Uria', yn(val('Protein_Uria')), ''],
+    ['Gula Darah', yn(val('Gula_Darah')), ''],
+  ].filter(r => r[1] !== null && r[1] !== undefined && r[1] !== '')
+   .map(([l, v, u]) => '<tr><td>' + l + '</td><td>' + v + (u ? ' ' + u : '') + '</td></tr>').join('');
+  const flags = (data.clinical_flags || []).map(f => '<li class="fl ' + f.level + '">' + f.text + '</li>').join('') || '<li class="fl info">Tidak ada catatan khusus.</li>';
+  const rekom = (data.rekomendasi || []).map(r => '<li>' + r + '</li>').join('');
+  const statusText = isHigh ? 'PERLU RUJUKAN / BERISIKO' : 'TIDAK BERISIKO TINGGI';
+  const cls = isHigh ? 'high' : 'low';
+  return '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+  '<title>Laporan Hasil Skrining Preeklampsia - SiPEKA</title><style>' +
+  '*{box-sizing:border-box;margin:0;padding:0}' +
+  "body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;background:#eef4f8;padding:24px;line-height:1.6}" +
+  '.sheet{max-width:780px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.08);overflow:hidden}' +
+  '.top{background:linear-gradient(135deg,#0ea5e9,#0d9488);color:#fff;padding:22px 32px}' +
+  '.top h1{font-size:20px;font-weight:700}.top .sub{font-size:12px;opacity:.92;margin-top:2px}' +
+  '.meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:14px 32px;border-bottom:1px solid #e2e8f0;font-size:12px;color:#64748b}' +
+  '.status{margin:22px 32px;padding:18px 22px;border-radius:12px;display:flex;align-items:center;gap:16px}' +
+  '.status.high{background:#fef2f2;border:1.5px solid #fca5a5}.status.low{background:#f0fdf4;border:1.5px solid #86efac}' +
+  '.status .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b}' +
+  '.status .val{font-size:19px;font-weight:700;margin-top:2px}.status.high .val{color:#b91c1c}.status.low .val{color:#15803d}' +
+  '.status .prob{margin-left:auto;text-align:right}.status .prob b{font-size:24px;font-weight:800}' +
+  '.status.high .prob b{color:#dc2626}.status.low .prob b{color:#16a34a}' +
+  'h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#0369a1;margin:22px 32px 10px}' +
+  'table{width:calc(100% - 64px);margin:0 32px;border-collapse:collapse;font-size:13px}' +
+  'td{padding:7px 10px;border-bottom:1px solid #eef2f6}td:first-child{color:#64748b;width:55%}td:last-child{font-weight:600;text-align:right}' +
+  'ul{margin:0 32px;padding-left:0;list-style:none;font-size:13px}ul li{padding:6px 0 6px 18px;position:relative}' +
+  "ul li:before{content:'•';position:absolute;left:2px;color:#0ea5e9;font-weight:700}" +
+  '.fl{border-radius:6px;padding:8px 12px;margin-bottom:6px}.fl:before{display:none}' +
+  '.fl.danger{background:#fef2f2;color:#b91c1c}.fl.warning{background:#fffbeb;color:#b45309}.fl.info{background:#f0f9ff;color:#0369a1}.fl.ok{background:#f0fdf4;color:#15803d}' +
+  '.foot{margin:26px 32px 0;padding:14px 0 26px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center}' +
+  '.bar{position:sticky;top:0;background:#0369a1;color:#fff;padding:10px;text-align:center;margin:-24px -24px 20px}' +
+  '.bar button{background:#fff;color:#0369a1;border:none;padding:8px 18px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;margin:0 4px}' +
+  '@media print{.bar{display:none}body{background:#fff;padding:0}.sheet{box-shadow:none;border-radius:0;max-width:100%}@page{margin:1.4cm}}' +
+  '</style></head><body>' +
+  '<div class="bar"><button onclick="window.print()">Cetak / Simpan PDF</button><button onclick="window.close()">Tutup</button></div>' +
+  '<div class="sheet">' +
+  '<div class="top"><h1>Laporan Hasil Skrining Risiko Preeklampsia</h1><div class="sub">SiPEKA - Sistem Pendukung Keputusan Bidan - Puskesmas Cipayung</div></div>' +
+  '<div class="meta"><span>Tanggal: ' + tgl + '</span><span>Data pasien: Anonim</span></div>' +
+  '<div class="status ' + cls + '"><div><div class="lbl">Hasil Skrining</div><div class="val">' + statusText + '</div></div>' +
+  '<div class="prob"><div class="lbl">Probabilitas</div><b>' + data.probability + '%</b></div></div>' +
+  '<h2>Ringkasan Data Pemeriksaan</h2><table>' + rows + '</table>' +
+  '<h2>Catatan Klinis</h2><ul>' + flags + '</ul>' +
+  '<h2>Rekomendasi Tindak Lanjut</h2><ul>' + rekom + '</ul>' +
+  '<div class="foot">Laporan ini dihasilkan oleh sistem SiPEKA sebagai alat bantu skrining, bukan pengganti diagnosis dokter. Hasil wajib dikonfirmasi oleh tenaga medis.</div>' +
+  '</div></body></html>';
+}
+
+function openReport() {
+  if (!lastData) { showToast('Belum ada hasil untuk dicetak.', 'error'); return; }
+  const w = window.open('', '_blank');
+  if (!w) { showToast('Pop-up diblokir. Izinkan pop-up untuk membuka laporan.', 'error'); return; }
+  w.document.open(); w.document.write(buildReportHTML(lastData)); w.document.close();
+}
+
 function showToast(msg, type = 'error') {
   let toast = document.querySelector('.toast');
   if (!toast) { toast = document.createElement('div'); toast.className = 'toast'; document.body.appendChild(toast); }
@@ -276,14 +354,16 @@ document.addEventListener('DOMContentLoaded', () => {
   $('predict-form').addEventListener('submit', handleSubmit);
   $('modal-close').addEventListener('click', closeModal);
   $('btn-reset').addEventListener('click', () => { closeModal(); resetForm(); });
-  $('btn-print').addEventListener('click', () => window.print());
+  $('btn-print').addEventListener('click', openReport);
   $('result-modal').addEventListener('click', e => { if (e.target === $('result-modal')) closeModal(); });
+  $('warn-ok').addEventListener('click', closeWarn);
+  $('warn-modal').addEventListener('click', e => { if (e.target === $('warn-modal')) closeWarn(); });
   $('btn-example').addEventListener('click', fillExample);
   $('btn-panduan').addEventListener('click', openPanduan);
   $('panduan-close').addEventListener('click', closePanduan);
   $('panduan-ok').addEventListener('click', closePanduan);
   $('panduan-modal').addEventListener('click', e => { if (e.target === $('panduan-modal')) closePanduan(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePanduan(); endTour(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePanduan(); closeWarn(); endTour(); } });
   $('tour-next').addEventListener('click', nextTour);
   $('tour-prev').addEventListener('click', prevTour);
   $('tour-skip').addEventListener('click', endTour);

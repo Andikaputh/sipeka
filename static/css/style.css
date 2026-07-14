@@ -430,3 +430,12 @@ body::before{content:'';position:fixed;inset:0;
 .tour-btn.filled{background:var(--sky-600);color:white;border-color:var(--sky-600)}
 .tour-btn.filled:hover{background:var(--sky-700)}
 @media print{.tour{display:none!important}}
+
+
+/* ═══ Modal peringatan data wajib ═══ */
+.modal.warn{max-width:420px;text-align:center}
+.warn-body{padding:2rem 1.75rem 1.25rem}
+.warn-icon{width:56px;height:56px;border-radius:50%;background:var(--amber-50);display:grid;place-items:center;margin:0 auto 1rem}
+.warn-icon svg{width:28px;height:28px;color:var(--amber-600)}
+.warn-title{font-family:var(--font-d);font-size:1.15rem;font-weight:600;color:var(--sky-900);margin-bottom:.5rem}
+.warn-text{font-size:.85rem;color:var(--slate-600);line-height:1.6}
