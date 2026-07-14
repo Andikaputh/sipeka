@@ -265,7 +265,7 @@ function buildReportHTML(data) {
   '</style></head><body>' +
   '<div class="bar"><button onclick="window.print()">Cetak / Simpan PDF</button><button onclick="window.close()">Tutup</button></div>' +
   '<div class="sheet">' +
-  '<div class="top"><h1>Laporan Hasil Skrining Risiko Preeklampsia</h1><div class="sub">SiPEKA - Sistem Pendukung Keputusan Bidan - Puskesmas Cipayung</div></div>' +
+  '<div class="top"><h1>Laporan Hasil Skrining Risiko Preeklampsia</h1><div class="sub">SiPEKA - Sistem Prediksi Risiko Preeklampsia - Puskesmas Cipayung</div></div>' +
   '<div class="meta"><span>Tanggal: ' + tgl + '</span><span>Data pasien: Anonim</span></div>' +
   '<div class="status ' + cls + '"><div><div class="lbl">Hasil Skrining</div><div class="val">' + statusText + '</div></div>' +
   '<div class="prob"><div class="lbl">Probabilitas</div><b>' + data.probability + '%</b></div></div>' +
