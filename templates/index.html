@@ -22,6 +22,10 @@
     </div>
   </div>
   <div class="navbar-right">
+    <button type="button" class="nav-btn" id="btn-panduan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Panduan
+    </button>
     <span class="nav-badge">Alat Bantu Skrining Bidan</span>
   </div>
 </nav>
@@ -208,6 +212,10 @@
               <div class="spinner"></div>
               <span class="btn-text">Analisis Risiko Preeklampsia</span>
             </button>
+            <button type="button" class="btn-example" id="btn-example">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="12" y1="12" x2="12" y2="18"/></svg>
+              Isi Contoh Data
+            </button>
           </form>
         </div>
       </div>
@@ -265,6 +273,7 @@
       <div class="print-header">
         <div class="print-title">SiPEKA &mdash; Hasil Skrining Risiko Preeklampsia</div>
         <div class="print-sub">Puskesmas Cipayung &middot; Alat Bantu Skrining Bidan</div>
+        <div class="print-date" id="print-date"></div>
       </div>
       <div id="risk-badge" class="risk-badge">
         <div id="risk-icon-wrap" class="risk-icon-wrap">
@@ -284,6 +293,11 @@
         <div class="prob-track"><div id="prob-fill" class="prob-fill" style="width:0%"></div></div>
       </div>
       <div class="result-divider"></div>
+      <div class="recap-section">
+        <div class="recap-title">Ringkasan Data Pemeriksaan</div>
+        <div class="recap-grid" id="recap-grid"></div>
+      </div>
+      <div class="result-divider"></div>
       <div class="flags-section" id="flags-section"></div>
       <div class="result-divider"></div>
       <div id="rekom-section" class="rekom-section">
@@ -301,6 +315,45 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
         Cetak Hasil
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PANDUAN PENGGUNA -->
+<div class="modal-overlay" id="panduan-modal" aria-hidden="true">
+  <div class="modal panduan" role="dialog" aria-modal="true" aria-labelledby="panduan-title">
+    <button class="modal-close" id="panduan-close" aria-label="Tutup">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="panduan-body">
+      <div class="print-header">
+        <div class="print-title" id="panduan-title">Panduan Penggunaan SiPEKA</div>
+        <div class="print-sub">Baca sebelum memasukkan data pasien</div>
+      </div>
+      <div class="panduan-block">
+        <div class="panduan-h">Langkah Penggunaan</div>
+        <ol class="panduan-steps">
+          <li>Isi <strong>TD Sistolik</strong> dan <strong>TD Diastolik</strong> (wajib). MAP terhitung otomatis.</li>
+          <li>Lengkapi data lain bila tersedia (usia, usia kehamilan, berat dan tinggi badan, LILA, protein uria, gula darah). IMT terhitung otomatis dari berat dan tinggi badan.</li>
+          <li>Klik <strong>Analisis Risiko Preeklampsia</strong>. Hasil muncul dalam beberapa detik.</li>
+          <li>Baca hasil, ringkasan data, dan rekomendasi tindak lanjut pada jendela hasil, lalu <strong>Cetak Hasil</strong> bila perlu.</li>
+          <li>Klik <strong>Tutup &amp; Reset</strong> untuk memeriksa pasien berikutnya.</li>
+        </ol>
+      </div>
+      <div class="panduan-block">
+        <div class="panduan-h">Arti Ambang Klinis</div>
+        <ul class="panduan-list">
+          <li><b class="danger">TD &ge;140/90 mmHg</b> memenuhi kriteria hipertensi, disarankan rujukan.</li>
+          <li><b class="warn">TD 130&ndash;139 / 85&ndash;89 mmHg</b> mendekati ambang, perlu kewaspadaan.</li>
+          <li><b>Protein uria positif</b> merupakan salah satu kriteria preeklampsia.</li>
+        </ul>
+      </div>
+      <div class="panduan-note">
+        SiPEKA adalah <strong>alat bantu skrining</strong>, bukan pengganti diagnosis dokter. Setiap hasil tetap dikonfirmasi oleh tenaga medis.
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-action filled" id="panduan-ok" style="flex:1">Mengerti, Mulai Gunakan</button>
     </div>
   </div>
 </div>

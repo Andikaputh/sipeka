@@ -115,6 +115,36 @@ function renderResult(data) {
   fill.style.width = '0%';
   setTimeout(() => { fill.style.width = probPct + '%'; }, 120);
 
+  // Tanggal pemeriksaan
+  const now = new Date();
+  $('print-date').textContent = 'Tanggal pemeriksaan: ' +
+    now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) +
+    ', ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+  // Ringkasan data pemeriksaan
+  const yn = v => (v === '1' ? 'Positif' : (v === '0' ? 'Negatif' : null));
+  const recap = $('recap-grid');
+  recap.innerHTML = '';
+  [
+    ['Usia Ibu', val('Usia_Tahun'), 'tahun'],
+    ['Usia Kehamilan', val('Usia_Kehamilan_Minggu'), 'minggu'],
+    ['TD Sistolik', val('TD_Sistolik'), 'mmHg'],
+    ['TD Diastolik', val('TD_Diastolik'), 'mmHg'],
+    ['MAP', $('MAP').value, 'mmHg'],
+    ['Berat Badan', val('BB_kg'), 'kg'],
+    ['Tinggi Badan', val('TB_cm'), 'cm'],
+    ['IMT', $('IMT').value, 'kg/m²'],
+    ['LILA', val('LILA_cm'), 'cm'],
+    ['Protein Uria', yn(val('Protein_Uria')), ''],
+    ['Gula Darah', yn(val('Gula_Darah')), ''],
+  ].forEach(([label, value, unit]) => {
+    if (value === null || value === undefined || value === '') return;
+    const div = document.createElement('div');
+    div.className = 'recap-item';
+    div.innerHTML = '<span>' + label + '</span><b>' + value + (unit ? (' ' + unit) : '') + '</b>';
+    recap.appendChild(div);
+  });
+
   const flagsEl = $('flags-section');
   flagsEl.innerHTML = '';
   const icons = { danger: '[!]', warning: '[!]', info: '[i]', ok: '[ok]' };
@@ -144,6 +174,37 @@ function resetForm() {
   document.querySelectorAll('.input-danger, .input-warning').forEach(el => el.classList.remove('input-danger', 'input-warning'));
 }
 
+function fillExample() {
+  const ex = {
+    Usia_Tahun: 29, Usia_Kehamilan_Minggu: 34,
+    TD_Sistolik: 145, TD_Diastolik: 95,
+    BB_kg: 72, TB_cm: 158, LILA_cm: 24,
+    Protein_Uria: '1', Gula_Darah: '0',
+  };
+  Object.keys(ex).forEach(id => {
+    const el = $(id);
+    if (!el) return;
+    el.value = ex[id];
+    el.dispatchEvent(new Event('input'));
+    el.dispatchEvent(new Event('change'));
+  });
+  calcMAP(); calcIMT();
+  showToast('Contoh data terisi. Klik Analisis Risiko untuk melihat hasilnya.', 'success');
+}
+
+function openPanduan() {
+  const m = $('panduan-modal');
+  m.classList.add('open');
+  m.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+function closePanduan() {
+  const m = $('panduan-modal');
+  m.classList.remove('open');
+  m.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
 function showToast(msg, type = 'error') {
   let toast = document.querySelector('.toast');
   if (!toast) { toast = document.createElement('div'); toast.className = 'toast'; document.body.appendChild(toast); }
@@ -161,6 +222,12 @@ document.addEventListener('DOMContentLoaded', () => {
   $('btn-reset').addEventListener('click', () => { closeModal(); resetForm(); });
   $('btn-print').addEventListener('click', () => window.print());
   $('result-modal').addEventListener('click', e => { if (e.target === $('result-modal')) closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  $('btn-example').addEventListener('click', fillExample);
+  $('btn-panduan').addEventListener('click', openPanduan);
+  $('panduan-close').addEventListener('click', closePanduan);
+  $('panduan-ok').addEventListener('click', closePanduan);
+  $('panduan-modal').addEventListener('click', e => { if (e.target === $('panduan-modal')) closePanduan(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closePanduan(); } });
   console.log('SiPEKA initialized');
 });
+
