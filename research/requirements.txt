@@ -1,0 +1,7 @@
+# Extra tooling for the archived notebooks; not a training lockfile.
+-r ../requirements.txt
+matplotlib
+seaborn
+scipy
+openpyxl
+jupyterlab

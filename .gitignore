@@ -4,3 +4,15 @@ __pycache__/
 *.pyc
 .vscode/
 .DS_Store
+
+# Local environments, notebook outputs, secrets, and private research data
+.venv*/
+.ipynb_checkpoints/
+.env
+.env.*
+!.env.example
+data/
+*.csv
+*.xlsx
+*.xls
+*.zip
