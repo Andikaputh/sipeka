@@ -16,3 +16,6 @@ data/
 *.xlsx
 *.xls
 *.zip
+
+# Cache/output tool graphify (dihasilkan ulang, jangan di-commit)
+graphify-out/

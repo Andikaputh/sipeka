@@ -2,7 +2,15 @@
 
 [Kembali ke halaman utama](../README.md)
 
-Folder ini mengarsipkan dua notebook asli dari bahan Penulisan Ilmiah. Notebook tidak digabung atau dilatih ulang pada penataan ini. Dataset tidak disertakan; hasil eksperimen di repo belum diverifikasi ulang terhadap data sumber.
+Folder ini mengarsipkan notebook asli dari bahan Penulisan Ilmiah, ditambah satu versi modeling yang ditata ulang mengikuti alur CRISP-DM. Dataset tidak disertakan. **Notebook lama tidak menghasilkan bundle aktif**: `model/` sekarang berasal dari eksperimen OOF terpisah yang direproduksi pada CSV asli di luar repo. Angka hasil hanya mengukur kecocokan terhadap label penelitian yang dibuat dari TD/proteinuria, bukan diagnosis klinis.
+
+> Audit metodologi: pemilihan ambang di notebook lama memakai `y_test` (lihat catatan di bawah). Bundle aktif memilih 0,838 dari prediksi OOF data latih, tetapi imputer/scaler di-fit sebelum CV sehingga validasi antarfold belum sepenuhnya terisolasi. Gambar lama `reports/figures/05_evaluasi.png` menggambarkan run 0,627 dan **tidak boleh dipakai sebagai gambar hasil aktif**.
+
+| Berkas | Status |
+|---|---|
+| [`notebooks/SiPEKA_Data_Preparation.ipynb`](notebooks/SiPEKA_Data_Preparation.ipynb) | asli, tidak diubah |
+| [`notebooks/SiPEKA_Modeling.ipynb`](notebooks/SiPEKA_Modeling.ipynb) | asli, tidak diubah (arsip) |
+| [`notebooks/SiPEKA_Modeling_CRISPDM.ipynb`](notebooks/SiPEKA_Modeling_CRISPDM.ipynb) | versi modeling yang ditata ulang |
 
 ## Urutan kerja
 
@@ -24,6 +32,17 @@ Buka [SiPEKA_Modeling.ipynb](notebooks/SiPEKA_Modeling.ipynb).
 - Output: `features.pkl`, `imputer.pkl`, `scaler.pkl`, `model.pkl`, `metrics.json`, enam PNG, serta `SiPEKA_model.zip`.
 - Ada teks ringkasan lama yang menyebut RandomizedSearch, tetapi kode menggunakan **GridSearchCV**. Notebook asli dipertahankan, bukan diam-diam direvisi dalam penataan arsip ini.
 
+### 2b. Modeling — versi CRISP-DM (tatanan baru)
+
+Buka [SiPEKA_Modeling_CRISPDM.ipynb](notebooks/SiPEKA_Modeling_CRISPDM.ipynb).
+
+- Notebook ini adalah **penataan ulang, bukan eksperimen baru**. Model, hyperparameter, split, urutan evaluasi, dan threshold tidak diubah.
+- Satu sel = satu langkah. Sel besar dipecah (EDA 6 panel, tabel 3.2/3.3, GridSearch, gambar evaluasi, `metrics.json`) dan setiap fase punya heading bernomor.
+- Perbaikan teknis: `from google.colab import files` dibungkus `try/except` sehingga bisa jalan lokal; seed terpusat di `SEED`/`RANDOM_STATE`; lokasi artefak terpusat di `OUT`; `boxplot(labels=...)` diganti `tick_labels` dengan fallback matplotlib lama; teks ringkasan "RandomizedSearch" diperbaiki menjadi GridSearchCV; ada sel *smoke test* yang memuat ulang `model.pkl` dan menjalankan satu prediksi.
+- `metrics.json` dari notebook ini menambah kunci `random_state` dan `grid_search`; kunci lama yang dibaca aplikasi tidak berubah.
+- Perbedaan angka dengan notebook asli (bila ada) berarti selisi versi pustaka atau data, bukan perubahan metodologi. Bandingkan sebelum memakai hasilnya.
+
+
 ### 3. Arsip hasil dan aplikasi
 
 | Hasil | Lokasi repo |
@@ -38,12 +57,12 @@ Notebook menyimpan output di direktori kerja runtime; tidak otomatis memperbarui
 
 ### Google Colab
 
-1. Unggah/buka kedua notebook secara terpisah di Colab.
+1. Unggah/buka notebook yang dipakai secara terpisah di Colab (persiapan data, lalu modeling).
 2. Jalankan persiapan data dengan laporan yang diizinkan; unduh atau simpan CSV hasilnya dari runtime.
 3. Pada runtime modeling, pasang dependensi yang dibutuhkan lalu unggah CSV tersebut melalui sel upload.
 4. Jalankan sel berurutan. Unduh hasil ZIP dari sel akhir jika eksperimen berhasil.
 
-Sel instalasi bawaan modeling hanya memasang XGBoost dan imbalanced-learn tanpa pin versi. Ini bukan environment pelatihan yang terkunci. Ikuti kebutuhan pustaka pada kode dan simpan versi lingkungan bila mereproduksi eksperimen baru.
+`SiPEKA_Modeling.ipynb` memasang XGBoost dan imbalanced-learn tanpa pin versi. `SiPEKA_Modeling_CRISPDM.ipynb` memakai sel pemasangan terjaga yang hanya berjalan bila paket belum ada, dan memakai batas versi kasar (`xgboost>=3.0,<4`, `imbalanced-learn>=0.13,<0.14`). Keduanya belum menjadi environment pelatihan yang terkunci; simpan versi lingkungan bila mereproduksi eksperimen baru.
 
 ### Lingkungan lokal
 
@@ -54,7 +73,9 @@ python -m pip install -r research/requirements.txt
 python -m jupyter lab
 ```
 
-Buka notebook dari `research/notebooks/`. Persiapan data memiliki fallback lokal; **modeling belum siap dijalankan lokal tanpa penyesuaian upload/download Colab**. Penataan ini tidak melakukan perubahan kode tersebut. Jangan menganggap perintah instalasi menjamin notebook akan selesai berjalan: data sumber dan runtime pelatihan asli tidak tersedia untuk verifikasi.
+Buka notebook dari `research/notebooks/`. Persiapan data dan `SiPEKA_Modeling_CRISPDM.ipynb` punya fallback lokal (membaca `Dataset_Primer_Final.csv` dari direktori kerja, menulis artefak ke direktori kerja). **`SiPEKA_Modeling.ipynb` yang asli belum siap dijalankan lokal tanpa penyesuaian upload/download Colab** dan sengaja tidak diubah. Jangan menganggap perintah instalasi menjamin notebook akan selesai berjalan: data sumber dan runtime pelatihan asli tidak tersedia untuk verifikasi.
+
+Smoke test versi CRISPDM sudah dilakukan dengan CSV sintetis berskema sama (bukan data penelitian): 52 sel code berjalan tanpa error dan seluruh artefak serta enam PNG terbentuk. Itu menguji struktur dan urutan sel, bukan angka penelitian.
 
 `research/requirements.txt` menambahkan paket visualisasi, Excel, dan Jupyter di atas dependensi aplikasi. Paket tambahan belum dipin ke versi pelatihan asli; tidak disajikan sebagai lockfile atau reproduksi persis.
 
@@ -73,4 +94,4 @@ Buka notebook dari `research/notebooks/`. Persiapan data memiliki fallback lokal
 - Bersihkan output sel dan metadata/attachment yang memuat informasi sensitif.
 - Tinjau gambar dan teks hasil eksperimen sebelum dipublikasikan.
 - `.gitignore` memblokir CSV/Excel dan folder data secara default, tetapi pola ignore bukan jaminan keamanan; pemeriksaan manual tetap diperlukan.
-- Pada penataan ini, kedua notebook memiliki nol output sel. Gambar yang ditambahkan adalah grafik analisis, bukan tabel identitas pasien; sebagian memuat titik distribusi data tanpa label identitas.
+- Pada penataan ini, ketiga notebook memiliki nol output sel. Gambar yang ditambahkan adalah grafik analisis, bukan tabel identitas pasien; sebagian memuat titik distribusi data tanpa label identitas.

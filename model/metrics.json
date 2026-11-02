@@ -1,5 +1,10 @@
 {
   "versi": "SiPEKA — OOF threshold selection (data primer, Label Risiko)",
+  "artikel_judul": "Development and Preliminary Evaluation of an Antenatal Rule-Based Screening Support Prototype Using Primary Care Records",
+  "study_scope": "Evaluasi awal prototipe dan kecocokan model terhadap label aturan penelitian, bukan diagnosis atau prediksi kejadian preeklampsia",
+  "score_interpretation": "Probabilitas keluaran model terhadap label aturan TD/proteinuria; bukan peluang klinis preeklampsia",
+  "clinical_validation": false,
+  "usability_reassessment_after_interface_revision": false,
   "puskesmas": "Cipayung P3172030201",
   "periode": "Januari-April 2026",
   "label_strategy": "(TD_Sistolik>=130 ATAU TD_Diastolik>=85) DAN Protein_Uria==1",

@@ -1,8 +1,8 @@
-# SiPEKA — Sistem Prediksi Risiko Preeklampsia
+# SiPEKA — Prototipe Pendukung Skrining ANC Berbasis Aturan
 
-Proyek Penulisan Ilmiah yang mencakup notebook persiapan data, pemodelan XGBoost + SMOTE, artefak model, visualisasi penelitian, dan prototipe aplikasi web Flask.
+Proyek Penulisan Ilmiah yang mencakup notebook persiapan data, pemodelan XGBoost + SMOTE terhadap label aturan, artefak model, visualisasi penelitian, dan prototipe aplikasi web Flask. Judul artikel turunan yang disetujui berbeda dari judul PI dan membatasi klaim pada evaluasi awal teknologi skrining.
 
-> **Prototipe penelitian, bukan alat diagnosis atau perangkat klinis tervalidasi.** Skor dan pesan aplikasi tidak menggantikan evaluasi tenaga medis. Dataset pasien tidak disertakan. Metrik tersimpan merupakan hasil eksperimen terdahulu, bukan hasil pelatihan ulang atau validasi independen pada pembaruan dokumentasi ini.
+> **Prototipe penelitian, bukan alat diagnosis atau perangkat klinis tervalidasi.** Label dibentuk dari `(TD sistolik >=130 ATAU diastolik >=85) DAN proteinuria biner positif`; model mempelajari label tersebut, bukan diagnosis klinisi. Skor dan peringatan TD terpisah tidak menggantikan evaluasi tenaga medis. Dataset pasien tidak disertakan.
 
 ## Peta repositori
 
@@ -14,8 +14,9 @@ sipeka/
 │   ├── requirements.txt               # tambahan paket untuk notebook
 │   └── notebooks/
 │       ├── SiPEKA_Data_Preparation.ipynb
-│       └── SiPEKA_Modeling.ipynb
-├── reports/figures/                   # enam gambar hasil penelitian tersimpan
+│       ├── SiPEKA_Modeling.ipynb          # arsip asli, tidak diubah
+│       └── SiPEKA_Modeling_CRISPDM.ipynb  # modeling, ditata ulang per CRISP-DM
+├── reports/figures/                   # arsip run lama + gambar OOF model aktif
 ├── model/                            # artefak yang dipakai aplikasi (tetap di sini)
 │   ├── README.txt
 │   ├── features.pkl
@@ -36,10 +37,10 @@ sipeka/
 | Bagian | Mulai dari |
 |---|---|
 | Pengolahan laporan ANC menjadi dataset | [Notebook persiapan data](research/notebooks/SiPEKA_Data_Preparation.ipynb) |
-| Pelatihan, perbandingan, dan evaluasi model | [Notebook modeling](research/notebooks/SiPEKA_Modeling.ipynb) |
+| Pelatihan, perbandingan, dan evaluasi model | [Notebook modeling — versi CRISP-DM](research/notebooks/SiPEKA_Modeling_CRISPDM.ipynb) · [asli](research/notebooks/SiPEKA_Modeling.ipynb) |
 | Cara menjalankan penelitian dan batasannya | [Panduan penelitian](research/README.md) |
 | Angka hasil eksperimen tersimpan dan urutan fitur | [model/metrics.json](model/metrics.json) |
-| Gambar EDA dan evaluasi | [reports/figures](reports/figures/) |
+| Gambar EDA dan evaluasi (bedakan arsip dan aktif) | [reports/figures/README.md](reports/figures/README.md) |
 | Cara inferensi dan respons API | [app.py](app.py) |
 
 ## Alur singkat
@@ -49,7 +50,7 @@ sipeka/
 3. Artefak aplikasi berada di `model/`; Flask memuat imputer, scaler, daftar fitur, model, dan metrik dari lokasi tersebut.
 4. Gambar hasil eksperimen yang diarsipkan di repo berada di `reports/figures/`. Notebook asli menyimpan output relatif ke direktori kerja, bukan otomatis ke folder arsip ini.
 
-Notebook ditambahkan dari bahan penelitian lokal tanpa mengubah kode atau menggabungkannya. File model yang sudah ada cocok byte-per-byte dengan hasil model lokal saat diperiksa; tidak dibuat salinan PKL kedua di `research/`.
+Notebook asli di `research/` tetap arsip run lama. Artefak aktif `model/` berasal dari eksperimen OOF yang terpisah dan terdokumentasi di folder penelitian lokal (bukan notebook lama tersebut).
 
 ## Menjalankan aplikasi secara lokal
 
@@ -78,7 +79,7 @@ python -m pip install -r requirements.txt
 python app.py
 ```
 
-Buka `http://localhost:5000`. Perintah di atas mendokumentasikan entry point yang sudah ada; aplikasi belum diuji ulang dalam pembaruan arsip penelitian ini. Entry point lokal mengaktifkan debug dan bind ke semua interface; gunakan hanya di lingkungan pengembangan tepercaya, bukan sebagai server publik. `Procfile`/`render.yaml` tetap memakai Gunicorn tanpa mengubah struktur aplikasi.
+Buka `http://localhost:5000`. Jalankan `python -m unittest discover -s tests -v` untuk memeriksa kontrak model/API dengan input rekaan. Entry point lokal mengaktifkan debug dan bind ke semua interface; gunakan hanya di lingkungan pengembangan tepercaya, bukan sebagai server publik. `Procfile`/`render.yaml` memakai Gunicorn.
 
 **Keamanan artefak:** aplikasi menggunakan pickle. Muat hanya artefak dari sumber tepercaya; pickle dapat menjalankan kode saat dimuat. Kecocokan versi pustaka juga memengaruhi kemampuan memuat model. Versi runtime lengkap saat pelatihan belum diarsipkan, sehingga reproduksi persis belum dijamin.
 
@@ -86,8 +87,8 @@ Buka `http://localhost:5000`. Perintah di atas mendokumentasikan entry point yan
 
 - Urutan fitur tercatat di `model/metrics.json` dan `model/features.pkl`.
 - Alur inferensi: imputer → scaler → `predict_proba` → pembandingan dengan threshold.
-- Threshold tersimpan saat dokumentasi dibuat adalah `0.627`; backend membacanya dari `metrics.json` dan memiliki nilai fallback jika metrik tidak tersedia.
-- Backend juga menerapkan aturan override terpisah dari prediksi model. Karena itu keluaran aplikasi tidak selalu sama dengan klasifikasi model murni. Aturan tersebut adalah perilaku prototipe, bukan rekomendasi klinis yang diverifikasi dalam dokumentasi ini.
+- Threshold aktif adalah **0,838**; confusion matrix terhadap label aturan pada 301 baris uji: TP 17, FN 2, FP 0, TN 282. Backend membaca ambang dari `metrics.json`.
+- Respons `/api/predict` memisahkan `model_prediction`, `rule_indicator`, dan `clinical_override` (peringatan TD). Metrik model **tidak** mencakup override; pesan aplikasi bukan diagnosis atau rekomendasi klinis tervalidasi.
 - Jika model tidak tersedia, backend menyediakan fallback demo. Nilai `production` pada `/api/health` hanya menandakan model berhasil dimuat menurut kode, bukan sertifikasi kesiapan klinis/produksi.
 
 | Endpoint | Metode | Fungsi |
@@ -99,7 +100,7 @@ Buka `http://localhost:5000`. Perintah di atas mendokumentasikan entry point yan
 
 ## Batasan penelitian yang wajib dibaca
 
-Label penelitian dibentuk dari tekanan darah dan proteinuria, yang juga masuk sebagai fitur model. Metrik tinggi karena model mempelajari ulang aturan tersebut **bukan bukti deteksi penyakit secara independen**. Selain itu, notebook memilih threshold menggunakan label test set dan melakukan preprocessing sebelum cross-validation; angka evaluasi memerlukan audit metodologi sebelum dipakai untuk klaim generalisasi. Lihat rincian di [panduan penelitian](research/README.md).
+Label penelitian dibentuk dari tekanan darah dan proteinuria, yang juga masuk sebagai fitur model. Metrik tinggi karena model mempelajari ulang aturan tersebut **bukan bukti deteksi penyakit secara independen**. Notebook lama memilih threshold menggunakan test set; artefak aktif memilihnya melalui OOF data latih. Pada eksperimen aktif imputer/scaler masih di-fit pada seluruh data latih sebelum CV, sehingga CV **belum** sepenuhnya terisolasi antarfold. Jangan mengklaim validasi eksternal atau diagnosis klinis. Lihat [panduan penelitian](research/README.md).
 
 ## Privasi dan cakupan
 

@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SiPEKA - Sistem Prediksi Risiko Preeklampsia</title>
+<link rel="icon" href="data:,"/>
+<title>SiPEKA - Prototipe Pendukung Skrining ANC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet"/>
@@ -18,7 +19,7 @@
     </div>
     <div class="brand-text">
       <span class="brand-name">SiPEKA</span>
-      <span class="brand-sub">Sistem Prediksi Risiko Preeklampsia</span>
+      <span class="brand-sub">Prototipe Pendukung Skrining ANC</span>
     </div>
   </div>
   <div class="navbar-right">
@@ -34,8 +35,8 @@
 
   <div class="hero">
     <div class="hero-kicker"><span class="hero-dot"></span> Alat Bantu Bidan &middot; ANC Puskesmas</div>
-    <h1>Deteksi Dini Risiko <em>Preeklampsia</em><br>pada Ibu Hamil</h1>
-    <p>Masukkan data klinis pasien dari pemeriksaan ANC. Hasil prediksi risiko akan muncul di jendela hasil dan bisa langsung dicetak.</p>
+    <h1>Prototipe Pendukung <em>Skrining ANC</em><br>Berbasis Aturan</h1>
+    <p>Masukkan data pemeriksaan ANC tanpa identitas. Model menilai label penelitian berbasis TD dan proteinuria; keluarannya bukan diagnosis, bukan prediksi kejadian preeklampsia di masa depan, dan belum tervalidasi klinis.</p>
   </div>
 
   <div class="layout">
@@ -49,7 +50,7 @@
         </div>
         <ol class="side-steps">
           <li>Isi tekanan darah (wajib). Data lain diisi bila tersedia.</li>
-          <li>Klik tombol <strong>Analisis Risiko Preeklampsia</strong>.</li>
+          <li>Klik tombol <strong>Analisis Indikator Skrining</strong>.</li>
           <li>Baca hasil &amp; rekomendasi pada jendela yang muncul, cetak bila perlu.</li>
         </ol>
       </div>
@@ -58,7 +59,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
           Catatan Penting
         </div>
-        <p class="side-note">Sistem ini adalah <strong>alat bantu skrining</strong>, bukan pengganti diagnosis dokter. Hasil harus dikonfirmasi tenaga medis.</p>
+        <p class="side-note"><strong>Prototipe penelitian, bukan alat klinis.</strong> Label dibentuk dari TD dan proteinuria pada satu pemeriksaan; bukan diagnosis preeklampsia. Satu input TD tidak membuktikan pengukuran ulang.</p>
       </div>
     </aside>
 
@@ -77,7 +78,7 @@
         <div class="card-body">
           <div class="patient-banner">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            <p>Data pasien bersifat <strong>anonim</strong> dan hanya digunakan untuk prediksi pada sesi ini.</p>
+            <p>Jangan masukkan <strong>nama atau identitas pasien</strong>. Gunakan untuk demonstrasi penelitian, bukan keputusan klinis.</p>
           </div>
 
           <form id="predict-form" novalidate>
@@ -102,7 +103,7 @@
                   <input class="form-input" type="number" id="Usia_Kehamilan_Minggu" name="Usia_Kehamilan_Minggu" min="1" max="42" placeholder="contoh: 32"/>
                   <span class="input-unit">Minggu</span>
                 </div>
-                <span class="form-hint">Preeklampsia muncul setelah minggu ke-20</span>
+                <span class="form-hint">Usia kehamilan dicatat sebagai fitur; label penelitian lama tidak mensyaratkan usia &ge;20 minggu.</span>
               </div>
 
               <div class="form-section-label">Data Tekanan Darah</div>
@@ -189,7 +190,7 @@
                     <option value="1">Positif (Y)</option>
                   </select>
                 </div>
-                <span class="form-hint">Salah satu kriteria preeklampsia</span>
+                <span class="form-hint">Kode biner data PI, bukan derajat dipstick atau diagnosis.</span>
               </div>
 
               <div class="form-group">
@@ -210,7 +211,7 @@
             <button type="submit" class="btn-predict" id="predict-btn">
               <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
               <div class="spinner"></div>
-              <span class="btn-text">Analisis Risiko Preeklampsia</span>
+              <span class="btn-text">Analisis Indikator Skrining</span>
             </button>
             <button type="button" class="btn-example" id="btn-example">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="12" y1="12" x2="12" y2="18"/></svg>
@@ -226,7 +227,7 @@
       <div class="side-card">
         <div class="side-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          Ambang Klinis (PNPK)
+          Ambang Kewaspadaan TD (bukan label PI)
         </div>
         <ul class="ref-list">
           <li><span>Hipertensi (rujuk)</span> <b class="danger">&ge;140/90</b></li>
@@ -259,7 +260,7 @@
     <span class="footer-brand">SiPEKA</span>
     <div class="footer-dot"></div>
   </div>
-  <p>Sistem Prediksi Risiko Preeklampsia &middot; <strong>Program Studi Informatika</strong><br>
+  <p>Prototipe Pendukung Skrining ANC &middot; <strong>Program Studi Informatika</strong><br>
   Penelitian Ilmiah &middot; Data Primer ANC Puskesmas Cipayung &middot; 2025/2026</p>
 </footer>
 
@@ -345,7 +346,7 @@
         <ul class="panduan-list">
           <li><b class="danger">TD &ge;140/90 mmHg</b> memenuhi kriteria hipertensi, disarankan rujukan.</li>
           <li><b class="warn">TD 130&ndash;139 / 85&ndash;89 mmHg</b> mendekati ambang, perlu kewaspadaan.</li>
-          <li><b>Protein uria positif</b> merupakan salah satu kriteria preeklampsia.</li>
+          <li><b>Protein uria positif (kode 0/1)</b> adalah indikator label penelitian, bukan konfirmasi diagnosis atau kadar dipstick.</li>
         </ul>
       </div>
       <div class="panduan-note">

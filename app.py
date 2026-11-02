@@ -1,5 +1,6 @@
 """
-SiPEKA - Sistem Prediksi Risiko Preeklampsia
+SiPEKA - prototipe pendukung skrining berbasis label aturan ANC.
+Skor model bukan probabilitas diagnosis preeklampsia.
 Flask Backend API
 ==============================================
 Cara menjalankan:
@@ -11,6 +12,7 @@ Akses di: http://localhost:5000
 
 from flask import Flask, render_template, request, jsonify
 import pickle
+import math
 import numpy as np
 import pandas as pd
 import json
@@ -75,7 +77,7 @@ def build_rekomendasi(pred, data, severe=False):
     if pred == 1:
         if severe or (sbp and sbp >= 160) or (dbp and dbp >= 110):
             r.append("RUJUK SEGERA ke RS/SpOG - tekanan darah pada tingkat kegawatan kehamilan.")
-            r.append("Stabilkan pasien, siapkan rujukan, dan dampingi selama proses rujukan.")
+            r.append("Segera minta penilaian tenaga kesehatan sesuai protokol fasilitas.")
         elif (sbp and sbp >= 140) or (dbp and dbp >= 90):
             r.append("Rujuk / konsultasikan ke dokter atau SpOG - tekanan darah telah mencapai ambang PNPK.")
             r.append(f"Istirahatkan pasien 10-15 menit, lalu ukur ulang TD (saat ini {int(sbp or 0)}/{int(dbp or 0)} mmHg).")
@@ -96,7 +98,7 @@ def build_rekomendasi(pred, data, severe=False):
             r.append(f"Usia {int(usia)} tahun termasuk faktor risiko - tingkatkan kewaspadaan pemantauan.")
         r.append("Edukasi tanda bahaya: nyeri kepala hebat, pandangan kabur, nyeri ulu hati, bengkak mendadak.")
     else:
-        r.append("Lanjutkan pemeriksaan ANC rutin sesuai jadwal Kemenkes (minimal 6x).")
+        r.append("Ikuti pemeriksaan ANC sesuai jadwal yang ditetapkan tenaga kesehatan; hasil model bukan pernyataan aman.")
         r.append("Pantau tekanan darah pada setiap kunjungan ANC berikutnya.")
         if gula == 1:
             r.append("Catatan: skrining gula darah positif - tetap pantau meski risiko preeklampsia rendah.")
@@ -121,12 +123,27 @@ def index():
 @app.route('/api/predict', methods=['POST'])
 def predict():
     try:
-        data = request.get_json(force=True)
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            return jsonify({'status': 'error', 'message': 'Kirim objek JSON'}), 400
         required = ['TD_Sistolik', 'TD_Diastolik']
         missing = [f for f in required if f not in data]
         if missing:
             return jsonify({'status': 'error',
                             'message': f'Field wajib tidak ada: {missing}'}), 400
+
+        try:
+            sbp_input = float(data['TD_Sistolik'])
+            dbp_input = float(data['TD_Diastolik'])
+            if (not math.isfinite(sbp_input) or not math.isfinite(dbp_input)
+                    or not 60 <= sbp_input <= 300 or not 30 <= dbp_input <= 200
+                    or dbp_input >= sbp_input):
+                raise ValueError('TD di luar batas valid')
+            for field in ('Protein_Uria', 'Gula_Darah'):
+                if data.get(field) is not None and float(data[field]) not in (0.0, 1.0):
+                    raise ValueError(field + ' harus 0 atau 1')
+        except (TypeError, ValueError) as exc:
+            return jsonify({'status': 'error', 'message': 'Input TD atau kode biner tidak valid: ' + str(exc)}), 400
 
         if 'MAP' not in data or data.get('MAP') is None:
             data['MAP'] = round(
@@ -156,18 +173,24 @@ def predict():
             prob = float(model.predict_proba(X)[0][1])
             pred = int(prob >= THRESHOLD)
 
+        model_prediction = pred
         sbp_o = float(data.get('TD_Sistolik', 0))
         dbp_o = float(data.get('TD_Diastolik', 0))
+        # Referensi label PENELITIAN saja; proteinuria yang tidak dicatat
+        # tidak bisa ditafsirkan negatif. Ini bukan diagnosis klinis.
+        prot_value = data.get('Protein_Uria')
+        rule_indicator = (int((sbp_o >= 130 or dbp_o >= 85) and
+                          float(prot_value) == 1) if prot_value is not None else None)
         clinical_override = False
         override_reason = None
         if sbp_o >= 160 or dbp_o >= 110:
             clinical_override = True
-            override_reason = ('Hipertensi berat (TD >=160/110 mmHg) - kegawatan '
-                               'kehamilan, rujuk SEGERA terlepas dari skor model.')
+            override_reason = ('TD >=160/110 mmHg: segera minta evaluasi tenaga kesehatan '
+                               'terlepas dari skor model; bukan diagnosis preeklampsia.')
         elif sbp_o >= 140 or dbp_o >= 90:
             clinical_override = True
-            override_reason = ('TD >=140/90 mmHg (ambang PNPK) - perlu rujukan / '
-                               'evaluasi lanjut terlepas dari skor model.')
+            override_reason = ('TD >=140/90 mmHg: perlu evaluasi tenaga kesehatan '
+                               'terlepas dari skor model; bukan diagnosis preeklampsia.')
         if clinical_override:
             pred = 1
 
@@ -201,19 +224,26 @@ def predict():
         return jsonify({
             'status'            : 'success',
             'prediction'        : pred,
+            'model_prediction'  : model_prediction,
+            'rule_indicator'    : rule_indicator,
+            'study_label'       : ARTIFACTS.get('metrics', {}).get('label_strategy') if ARTIFACTS.get('metrics') else None,
+            'research_disclaimer': ('Prototipe klasifikasi label aturan TD/proteinuria. '
+                                    'Bukan diagnosis, prediksi kejadian di masa depan, atau alat klinis tervalidasi.'),
             'clinical_override' : clinical_override,
             'override_reason'   : override_reason,
             'probability'       : round(prob * 100, 1),
             'probability_raw'   : round(prob, 4),
             'threshold'         : THRESHOLD,
-            'label'             : 'Perlu Rujukan / Berisiko' if pred == 1 else 'Tidak Berisiko Tinggi',
+            'label'             : ('Indikator memerlukan evaluasi tenaga kesehatan'
+                                   if pred == 1 else 'Tidak terpicu; bukan berarti tidak berisiko'),
             'clinical_flags'    : flags,
             'rekomendasi'       : build_rekomendasi(pred, data, severe=(sbp_o >= 160 or dbp_o >= 110)),
             'input_data'        : {k: (round(v, 2) if isinstance(v, float) else v)
                                    for k, v in row.items() if not (isinstance(v, float) and np.isnan(v))},
         })
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+    except Exception:
+        app.logger.exception('Prediksi gagal; detail tidak dikirim ke klien')
+        return jsonify({'status': 'error', 'message': 'Pemrosesan gagal; jangan gunakan hasil ini untuk keputusan klinis.'}), 500
 
 
 @app.route('/api/health')
@@ -222,7 +252,7 @@ def health():
     return jsonify({
         'status'      : 'ok',
         'model_loaded': model_loaded,
-        'mode'        : 'production' if model_loaded else 'demo (rule-based)',
+        'mode'        : 'model_eksperimental' if model_loaded else 'demo (rule-based)',
         'features'    : FEATURES,
         'threshold'   : THRESHOLD,
     })

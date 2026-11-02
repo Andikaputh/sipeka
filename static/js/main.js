@@ -107,14 +107,16 @@ function renderResult(data) {
   const badge = $('risk-badge');
   badge.className = 'risk-badge ' + (isHigh ? 'high' : 'low');
   $('risk-label').textContent = 'HASIL SKRINING';
-  $('risk-title').textContent = isHigh ? 'Perlu Rujukan / Berisiko' : 'Tidak Berisiko Tinggi';
-  $('risk-sub').textContent = isHigh
-    ? 'Probabilitas model: ' + probPct + '% - tindak lanjuti sesuai rekomendasi'
-    : 'Probabilitas model: ' + probPct + '% - lanjutkan pemantauan rutin';
+  $('risk-title').textContent = data.label;
+  $('risk-sub').textContent = 'Skor model terhadap label aturan: ' + probPct +
+    '%. Indikator aturan penelitian: ' + (data.rule_indicator === null ?
+      'tidak dapat dihitung (proteinuria belum diisi)' : (data.rule_indicator ? 'terpicu' : 'tidak terpicu')) +
+    '. ' + (data.clinical_override ? 'Peringatan TD terpisah dari metrik model. ' : '') +
+    'Bukan diagnosis atau prediksi kejadian masa depan.';
   $('risk-icon').innerHTML = isHigh
     ? '<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
     : '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
-  $('prob-pct').textContent = probPct + '%';
+  $('prob-pct').textContent = probPct + '%*';
   const fill = $('prob-fill');
   fill.className = 'prob-fill ' + (isHigh ? 'danger' : '');
   fill.style.width = '0%';
@@ -235,10 +237,10 @@ function buildReportHTML(data) {
    .map(([l, v, u]) => '<tr><td>' + l + '</td><td>' + v + (u ? ' ' + u : '') + '</td></tr>').join('');
   const flags = (data.clinical_flags || []).map(f => '<li class="fl ' + f.level + '">' + f.text + '</li>').join('') || '<li class="fl info">Tidak ada catatan khusus.</li>';
   const rekom = (data.rekomendasi || []).map(r => '<li>' + r + '</li>').join('');
-  const statusText = isHigh ? 'PERLU RUJUKAN / BERISIKO' : 'TIDAK BERISIKO TINGGI';
+  const statusText = data.label;
   const cls = isHigh ? 'high' : 'low';
   return '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
-  '<title>Laporan Hasil Skrining Preeklampsia - SiPEKA</title><style>' +
+  '<title>Laporan Prototipe Skrining ANC - SiPEKA</title><style>' +
   '*{box-sizing:border-box;margin:0;padding:0}' +
   "body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;background:#eef4f8;padding:24px;line-height:1.6}" +
   '.sheet{max-width:780px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.08);overflow:hidden}' +
@@ -265,14 +267,15 @@ function buildReportHTML(data) {
   '</style></head><body>' +
   '<div class="bar"><button onclick="window.print()">Cetak / Simpan PDF</button><button onclick="window.close()">Tutup</button></div>' +
   '<div class="sheet">' +
-  '<div class="top"><h1>Laporan Hasil Skrining Risiko Preeklampsia</h1><div class="sub">SiPEKA - Sistem Prediksi Risiko Preeklampsia - Puskesmas Cipayung</div></div>' +
+  '<div class="top"><h1>Laporan Prototipe Skrining ANC</h1><div class="sub">SiPEKA - studi berbasis label aturan TD/proteinuria</div></div>' +
   '<div class="meta"><span>Tanggal: ' + tgl + '</span><span>Data pasien: Anonim</span></div>' +
   '<div class="status ' + cls + '"><div><div class="lbl">Hasil Skrining</div><div class="val">' + statusText + '</div></div>' +
-  '<div class="prob"><div class="lbl">Probabilitas</div><b>' + data.probability + '%</b></div></div>' +
+  '<div class="prob"><div class="lbl">Skor model terhadap label aturan*</div><b>' + data.probability + '%</b></div></div>' +
+  '<div class="meta"><span>Indikator aturan penelitian: ' + (data.rule_indicator === null ? 'tidak dapat dihitung' : (data.rule_indicator ? 'terpicu' : 'tidak terpicu')) + '</span><span>Peringatan TD (terpisah): ' + (data.clinical_override ? 'ada' : 'tidak') + '</span></div>' +
   '<h2>Ringkasan Data Pemeriksaan</h2><table>' + rows + '</table>' +
   '<h2>Catatan Klinis</h2><ul>' + flags + '</ul>' +
   '<h2>Rekomendasi Tindak Lanjut</h2><ul>' + rekom + '</ul>' +
-  '<div class="foot">Laporan ini dihasilkan oleh sistem SiPEKA sebagai alat bantu skrining, bukan pengganti diagnosis dokter. Hasil wajib dikonfirmasi oleh tenaga medis.</div>' +
+  '<div class="foot">*Skor model adalah kecocokan terhadap label aturan penelitian, bukan peluang klinis preeklampsia. Satu pengukuran TD tidak membuktikan hipertensi menetap. Prototipe ini bukan diagnosis atau alat klinis tervalidasi; tenaga kesehatan harus menilai hasilnya.</div>' +
   '</div></body></html>';
 }
 
@@ -294,11 +297,11 @@ function showToast(msg, type = 'error') {
 
 /* ---- Tur onboarding ---- */
 const tourSteps = [
-  { el: null, title: 'Selamat Datang di SiPEKA', text: 'Alat bantu skrining risiko preeklampsia untuk bidan pada pemeriksaan ANC. Kenali fiturnya sebentar. Anda dapat melewati kapan saja.' },
+  { el: null, title: 'Selamat Datang di SiPEKA', text: 'Prototipe penelitian untuk menguji indikator skrining berbasis TD/proteinuria, bukan alat diagnosis. Kenali fiturnya sebentar.' },
   { el: '#form-card', title: 'Formulir Data Klinis', text: 'Masukkan data pemeriksaan pasien di sini. Hanya tekanan darah yang wajib diisi, data lain melengkapi bila tersedia.' },
   { el: '#TD_Sistolik', title: 'Tekanan Darah (Wajib)', text: 'Isi TD Sistolik dan Diastolik. Nilai MAP akan terhitung otomatis dari kedua nilai ini.' },
   { el: '#btn-example', title: 'Isi Contoh Data', text: 'Klik untuk mengisi data contoh secara otomatis. Berguna untuk mencoba sistem dengan cepat.' },
-  { el: '#predict-btn', title: 'Analisis Risiko', text: 'Klik untuk menjalankan model dan menampilkan hasil prediksi beserta rekomendasi tindak lanjut.' },
+  { el: '#predict-btn', title: 'Analisis Indikator', text: 'Jalankan model terhadap label penelitian. Hasil bukan diagnosis atau prediksi kejadian di masa depan.' },
   { el: '#btn-panduan', title: 'Panduan & Tutorial', text: 'Buka panduan penggunaan atau putar ulang tutorial ini kapan saja melalui tombol ini.' },
 ];
 let tourIdx = 0;
@@ -374,4 +377,3 @@ document.addEventListener('DOMContentLoaded', () => {
   try { if (!localStorage.getItem('sipeka_tour_done')) setTimeout(startTour, 700); } catch (e) {}
   console.log('SiPEKA initialized');
 });
-
