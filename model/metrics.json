@@ -1,9 +1,8 @@
 {
-  "versi": "SiPEKA — CRISP-DM (data primer, Label Risiko)",
+  "versi": "SiPEKA — OOF threshold selection (data primer, Label Risiko)",
   "puskesmas": "Cipayung P3172030201",
   "periode": "Januari-April 2026",
   "label_strategy": "(TD_Sistolik>=130 ATAU TD_Diastolik>=85) DAN Protein_Uria==1",
-  "validasi_fitur": "Wakil Dekan 3 Kebidanan",
   "fitur_utama": [
     "TD_Sistolik",
     "TD_Diastolik",
@@ -33,7 +32,16 @@
     "Gula_Darah"
   ],
   "smote_k": 5,
-  "final_threshold": 0.627,
+  "final_threshold": 0.838,
+  "threshold_selection": {
+    "metode": "out-of-fold (cross_val_predict, 5-fold, data latih saja)",
+    "aturan": "F1 maksimum pada prediksi OOF",
+    "alternatif": {
+      "max_f1": 0.838,
+      "precision_90": 0.615,
+      "precision_95": 0.838
+    }
+  },
   "best_params": {
     "colsample_bytree": "0.8",
     "learning_rate": "0.05",
@@ -48,57 +56,73 @@
   "metrics": {
     "cv_accuracy": 99.25,
     "test_accuracy": 99.34,
-    "precision": 94.74,
-    "recall": 94.74,
-    "f1_score": 94.74,
-    "auc_roc": 99.93,
-    "avg_precision": 99.01,
-    "gap_cv_test": 0.08,
-    "tp": 18,
-    "fn": 1,
-    "fp": 1,
-    "tn": 281
+    "precision": 100.0,
+    "recall": 89.47,
+    "f1_score": 94.44,
+    "auc_roc": 99.91,
+    "avg_precision": 98.76,
+    "gap_cv_test": 0.09,
+    "tp": 17,
+    "fn": 2,
+    "fp": 0,
+    "tn": 282
   },
-  "tabel_3_2_sampling": {
-    "Tanpa Balancing": {
-      "recall": 96.0,
-      "f1": 97.93,
-      "roc_auc": 100.0,
-      "accuracy": 99.75
+  "operating_points": {
+    "legacy_0.627": {
+      "threshold": 0.627,
+      "tp": 17,
+      "fn": 2,
+      "fp": 2,
+      "tn": 280,
+      "accuracy": 98.67,
+      "precision": 89.47,
+      "recall": 89.47,
+      "f1": 89.47
     },
-    "SMOTE (dipilih)": {
-      "recall": 98.67,
-      "f1": 96.85,
-      "roc_auc": 99.99,
-      "accuracy": 99.58
+    "thesis_0.840": {
+      "threshold": 0.84,
+      "tp": 17,
+      "fn": 2,
+      "fp": 0,
+      "tn": 282,
+      "accuracy": 99.34,
+      "precision": 100.0,
+      "recall": 89.47,
+      "f1": 94.44
     },
-    "ADASYN": {
-      "recall": 97.33,
-      "f1": 96.08,
-      "roc_auc": 99.96,
-      "accuracy": 99.5
+    "oof_max_f1": {
+      "threshold": 0.838,
+      "tp": 17,
+      "fn": 2,
+      "fp": 0,
+      "tn": 282,
+      "accuracy": 99.34,
+      "precision": 100.0,
+      "recall": 89.47,
+      "f1": 94.44
+    },
+    "oof_precision_90": {
+      "threshold": 0.615,
+      "tp": 17,
+      "fn": 2,
+      "fp": 2,
+      "tn": 280,
+      "accuracy": 98.67,
+      "precision": 89.47,
+      "recall": 89.47,
+      "f1": 89.47
+    },
+    "oof_precision_95": {
+      "threshold": 0.838,
+      "tp": 17,
+      "fn": 2,
+      "fp": 0,
+      "tn": 282,
+      "accuracy": 99.34,
+      "precision": 100.0,
+      "recall": 89.47,
+      "f1": 94.44
     }
   },
-  "tabel_3_3_algoritma": {
-    "XGBoost": {
-      "recall": 98.67,
-      "f1": 96.85,
-      "roc_auc": 99.99,
-      "accuracy": 99.58
-    },
-    "Random Forest": {
-      "recall": 100.0,
-      "f1": 96.25,
-      "roc_auc": 99.95,
-      "accuracy": 99.5
-    },
-    "SVM (RBF)": {
-      "recall": 96.0,
-      "f1": 76.18,
-      "roc_auc": 99.56,
-      "accuracy": 96.18
-    }
-  },
-  "cara_prediksi": "imputer.transform -> scaler.transform -> predict_proba[:,1] >= final_threshold",
-  "catatan_website": "Form input: TD_Sistolik, TD_Diastolik, MAP(auto), Protein_Uria(Y/T), Usia_Tahun, Usia_Kehamilan_Minggu, IMT(auto BB/TB), LILA_cm, Gula_Darah(Y/T). HAPUS: Suhu Tubuh, Detak Jantung."
+  "cara_prediksi": "imputer.transform -> scaler.transform -> predict_proba[:,1] >= final_threshold"
 }
