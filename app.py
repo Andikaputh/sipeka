@@ -56,9 +56,9 @@ FEATURES = ARTIFACTS.get('features') or [
     'Usia_Tahun', 'Usia_Kehamilan_Minggu', 'IMT', 'LILA_cm', 'Gula_Darah',
 ]
 
-THRESHOLD = 0.35
+THRESHOLD = None
 if ARTIFACTS.get('metrics'):
-    THRESHOLD = ARTIFACTS['metrics'].get('final_threshold', 0.35)
+    THRESHOLD = ARTIFACTS['metrics'].get('final_threshold')
 
 print(f"  Features  : {len(FEATURES)}")
 print(f"  Threshold : {THRESHOLD}")
@@ -159,7 +159,7 @@ def predict():
         imputer = ARTIFACTS.get('imputer')
         scaler  = ARTIFACTS.get('scaler')
 
-        if model is None:
+        if model is None or THRESHOLD is None:
             sbp = float(data.get('TD_Sistolik', 0))
             dbp = float(data.get('TD_Diastolik', 0))
             prob = round(min(0.99, max(0.01,
@@ -217,7 +217,7 @@ def predict():
             elif usia < 20:
                 flags.append({'level': 'info', 'text': f'Usia {int(usia)} tahun - faktor risiko usia muda'})
         if not flags:
-            flags.append({'level': 'ok', 'text': 'Semua parameter dalam batas normal'})
+            flags.append({'level': 'ok', 'text': 'TD dan proteinuria yang dicatat tidak memicu peringatan; bukan jaminan aman'})
         if clinical_override:
             flags.insert(0, {'level': 'danger', 'text': 'OVERRIDE KLINIS: ' + override_reason})
 

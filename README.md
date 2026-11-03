@@ -88,8 +88,10 @@ Buka `http://localhost:5000`. Jalankan `python -m unittest discover -s tests -v`
 - Urutan fitur tercatat di `model/metrics.json` dan `model/features.pkl`.
 - Alur inferensi: imputer → scaler → `predict_proba` → pembandingan dengan threshold.
 - Threshold aktif adalah **0,838**; confusion matrix terhadap label aturan pada 301 baris uji: TP 17, FN 2, FP 0, TN 282. Backend membaca ambang dari `metrics.json`.
+- Bundle `model/model.pkl` yang benar-benar di-deploy berbeda satu prediksi dari model yang dilatih ulang untuk laporan: pada 301 baris yang sama hasilnya TP 17, FN 2, FP 1, TN 281 (akurasi 99,00%; precision 94,44%; F1 91,89%; korelasi skor 0,9986). Angka laporan utama tetap 17/2/0/282; perbedaan dicatat di `metrics.json` (`deployed_bundle_check`) dan dibahas terbuka di draf artikel.
 - Respons `/api/predict` memisahkan `model_prediction`, `rule_indicator`, dan `clinical_override` (peringatan TD). Metrik model **tidak** mencakup override; pesan aplikasi bukan diagnosis atau rekomendasi klinis tervalidasi.
-- Jika model tidak tersedia, backend menyediakan fallback demo. Nilai `production` pada `/api/health` hanya menandakan model berhasil dimuat menurut kode, bukan sertifikasi kesiapan klinis/produksi.
+- Proteinuria yang tidak diisi menghasilkan `rule_indicator: null`, **bukan** negatif.
+- Jika model atau ambang tidak tersedia, backend memakai mode demo berbasis aturan, bukan menebak ambang lain. Nilai `production` pada `/api/health` hanya menandakan model berhasil dimuat menurut kode, bukan sertifikasi kesiapan klinis/produksi.
 
 | Endpoint | Metode | Fungsi |
 |---|---|---|

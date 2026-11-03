@@ -129,5 +129,21 @@
       "f1": 94.44
     }
   },
-  "cara_prediksi": "imputer.transform -> scaler.transform -> predict_proba[:,1] >= final_threshold"
+  "cara_prediksi": "imputer.transform -> scaler.transform -> predict_proba[:,1] >= final_threshold",
+  "deployed_bundle_check": {
+    "path": "Deployment/model/model.pkl",
+    "threshold": 0.838,
+    "tp": 17,
+    "fn": 2,
+    "fp": 1,
+    "tn": 281,
+    "accuracy": 99.0,
+    "precision": 94.44,
+    "recall": 89.47,
+    "f1": 91.89,
+    "auc_roc": 99.93,
+    "avg_precision": 99.01,
+    "korelasi_dengan_model_dilatih_ulang": 0.998565,
+    "catatan": "Bundle yang di-deploy berbeda satu prediksi dari model yang dilatih ulang pada evaluasi laporan (17/2/0/282). Angka utama tetap hasil eksperimen OOF 0,838; perbedaan ini dilaporkan terbuka, bukan disembunyikan."
+  }
 }
